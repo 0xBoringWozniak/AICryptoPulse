@@ -1,0 +1,40 @@
+version: '3.7'
+
+services:
+  mongo_db:
+    build: 
+      context: .
+      dockerfile: Dockerfile_mongodb
+    networks:
+      - api_network
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+
+  api:
+    build: .
+    ports:
+      - 8000:8000
+    depends_on:
+      - mongo_db
+    env_file:
+      - .env
+    networks:
+      - api_network
+
+  tg_bot:
+    build: 
+      context: .
+      dockerfile: Dockerfile_tg_bot
+    depends_on:
+      - api
+    env_file:
+      - .env
+    networks:
+      - api_network
+
+networks:
+  api_network:
+    driver: bridge
