@@ -1,17 +1,12 @@
 import logging
+
 import requests
-
 from telegram import Update
-from telegram.ext import (
-    ContextTypes,
-    ConversationHandler,
-    CallbackContext,
-)
+from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
-from bot.creds import FASTAPI_BASE_URL
 from bot.api import get_all_users
-from bot.texts import START_TEXT, REGULAR_UPDATE_PROMPT
-
+from bot.creds import FASTAPI_BASE_URL
+from bot.texts import REGULAR_UPDATE_PROMPT, START_TEXT
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", 

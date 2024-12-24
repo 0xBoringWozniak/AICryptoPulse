@@ -1,18 +1,21 @@
-import boto3
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import Dict, List
 
-
-from fastapi import APIRouter, FastAPI, Depends
+import boto3
+from fastapi import APIRouter, Depends, FastAPI
 
 from service.api.response import JSONResponse, create_response
+from service.creds import (
+    AWS_S3_API_KEY,
+    AWS_S3_API_SECRET,
+    DB_HOST,
+    DB_PASS,
+    DB_PORT,
+    DB_USER,
+)
+from service.models import UserInit, UserNewPrompt, UserPrompt
 from service.mongo.app_database import AppDatabase
-from service.models import UserPrompt, UserInit, UserNewPrompt
 from service.rag_pipeline import RagPipeline
-
-from service.creds import DB_USER, DB_PASS, DB_HOST, DB_PORT
-from service.creds import AWS_S3_API_KEY, AWS_S3_API_SECRET
-
 
 router = APIRouter()
 

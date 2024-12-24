@@ -1,17 +1,22 @@
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
+    ConversationHandler,
     MessageHandler,
     filters,
-    ConversationHandler,
 )
-from bot.handlers import (
-    REGISTERING_PROMPT, SET_NEW_PROMPT,
-    start, set_prompt_command, register_prompt,
-    predict_message, update_prompt,
-    schedule_daily_job,
-)
+
 from bot.creds import TELEGRAM_BOT_TOKEN
+from bot.handlers import (
+    REGISTERING_PROMPT,
+    SET_NEW_PROMPT,
+    predict_message,
+    register_prompt,
+    schedule_daily_job,
+    set_prompt_command,
+    start,
+    update_prompt,
+)
 
 
 def main():

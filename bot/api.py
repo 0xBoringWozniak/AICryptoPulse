@@ -1,6 +1,6 @@
-import requests
+from typing import Dict, List
 
-from typing import List, Dict
+import requests
 
 from bot.creds import FASTAPI_BASE_URL
 

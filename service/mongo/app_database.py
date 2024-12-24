@@ -1,6 +1,6 @@
 import time
-
 from typing import Dict, List
+
 from pymongo import ASCENDING, IndexModel
 
 from service.mongo.database import ApplicationDatabaseException, DatabaseBase

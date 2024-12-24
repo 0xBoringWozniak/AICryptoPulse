@@ -8,7 +8,7 @@ endif
 
 export PATH := $(BIN):$(PATH)
 
-PROJECT := service
+PROJECT := bot
 TESTS := tests
 
 
@@ -22,7 +22,7 @@ clean:
 # Setup
 .venv:
 	python3 -m venv $(VENV)
-	pip3 install -r requirements.txt
+	pip3 install -r $(PROJECT)/requirements.txt
 
 setup: .venv
 

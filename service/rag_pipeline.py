@@ -1,16 +1,14 @@
 import os
-import tempfile
 import pickle
+import tempfile
+
 import faiss
-
-from sentence_transformers import SentenceTransformer
-
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain_community.vectorstores import FAISS
+from sentence_transformers import SentenceTransformer
 
 from service.creds import OPENAI_API_KEY
-
 
 RAG_CONFIG = {
     'OPENAI_MODEL': 'gpt-4o',
