@@ -17,7 +17,8 @@
 
 1. **Set up the Airflow module** (located in `/data`):
    - Refer to the [official Airflow documentation](https://airflow.apache.org/docs/apache-airflow/stable/start.html) for installation.
-   - Deploy a PostgreSQL database to store feed data.
+   - Run a PostgreSQL database to store feed data.
+   - Set up S3-like bucket to store FAISS indexes.
    - Configure settings in `/data/configs/`.
    - Enable all DAGs in the Airflow interface.
 
