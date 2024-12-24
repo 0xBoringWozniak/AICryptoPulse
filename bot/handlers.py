@@ -129,7 +129,8 @@ async def predict_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     username = update.effective_user.username
     payload = {
         "username": username,
-        "prompt": text
+        "prompt": text,
+        "daily_report": False,
     }
     url = f"{FASTAPI_BASE_URL}/predict"
     try:
@@ -158,7 +159,8 @@ async def daily_predict_job(context: CallbackContext):
         username = user_info["username"]
         payload = {
             "username": username,
-            "prompt": stored_prompt + '\n' + REGULAR_UPDATE_PROMPT
+            "prompt": stored_prompt + '\n' + REGULAR_UPDATE_PROMPT,
+            "daily_report": True,
         }
         url = f"{FASTAPI_BASE_URL}/predict"
         try:
@@ -182,7 +184,7 @@ def schedule_daily_job(application):
     job_queue = application.job_queue
     job_queue.run_repeating(
         callback=daily_predict_job,
-        interval=60 * 60 * 12,
+        interval=60 * 60 * 24,
         first=0,
         name="regular_report"
     )

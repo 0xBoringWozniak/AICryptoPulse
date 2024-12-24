@@ -27,6 +27,7 @@ class UserPrompt(BaseModel):
     """
     username: str
     prompt: str
+    daily_report: bool
 
 
 class UserNewPrompt(BaseModel):
