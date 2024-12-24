@@ -23,6 +23,7 @@ router = APIRouter()
 # Define the dependencies for the FastAPI endpoints
 #
 
+
 def get_s3_client() -> boto3.client:
     return boto3.client(
         "s3",
@@ -30,8 +31,10 @@ def get_s3_client() -> boto3.client:
         aws_secret_access_key=AWS_S3_API_SECRET,
     )
 
+
 def get_rag_pipeline() -> RagPipeline:
     return RagPipeline()
+
 
 def get_db() -> AppDatabase:
     return AppDatabase(
@@ -44,6 +47,7 @@ def get_db() -> AppDatabase:
 #
 # Define the FastAPI endpoints
 #
+
 
 @router.get(
     path="/health",
@@ -144,8 +148,9 @@ async def set_prompt(
     tags=["User"],
 )
 async def predict(
-    user: UserPrompt, s3_client = Depends(get_s3_client),
-    db: AppDatabase = Depends(get_db), rag = Depends(get_rag_pipeline),) -> JSONResponse:
+    user: UserPrompt, db: AppDatabase = Depends(get_db),
+    s3_client=Depends(get_s3_client), rag=Depends(get_rag_pipeline)
+) -> JSONResponse:
     """
     Predict a response for a user.
     """

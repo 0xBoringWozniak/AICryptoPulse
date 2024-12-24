@@ -8,21 +8,44 @@ endif
 
 export PATH := $(BIN):$(PATH)
 
+# Change this to actual service name (e.g. bot, service, etc.)
 PROJECT := bot
 TESTS := tests
+REQUIREMENTS := $(PROJECT)/requirements.txt
 
+# Debug
+print-paths:
+	@echo "Project: $(PROJECT)"
+	@echo "Tests directory: $(TESTS)"
+	@echo "Requirements file: $(REQUIREMENTS)"
 
-# Clean
+# Clean all artifacts
 clean:
-	rm -rf .mypy_cache
-	rm -rf .pytest_cache
-	rm -rf $(VENV)
+	rm -rf $(VENV) || true
+	find . -name __pycache__ -exec rm -rf {} \; || true
+	find . -name .pytest_cache -exec rm -rf {} \; || true
+	find . -name .mypy_cache -exec rm -rf {} \; || true
+	find . -name .coverage -exec rm -rf {} \; || true
+	find . -name '*runs' -exec rm -rf {} \; || true
+	find . -name '*mlruns' -exec rm -rf {} \; || true
+	find . -name '*mlartifacts' -exec rm -rf {} \; || true
+	find . -name .ipynb_checkpoints -exec rm -rf {} \; || true
+	find . -name '*loader' -exec rm -rf {} \; || true
+	find . -name '*_cache' -exec rm -rf {} \; || true
+	find . -name '*_output' -exec rm -rf {} \; || true
+	find . -name '*_logs' -exec rm -rf {} \; || true
+	find . -name '*_data' -exec rm -rf {} \; || true
+	find . -name '*_results' -exec rm -rf {} \; || true
+	find . -name '*build' -exec rm -rf {} \; || true
+	find . -name 'dist' -exec rm -rf {} \; || true
+	find . -name '*.egg-info' -exec rm -rf {} \; || true
 
 
 # Setup
 .venv:
-	python3 -m venv $(VENV)
-	pip3 install -r $(PROJECT)/requirements.txt
+	cd $(PROJECT) && python3 -m venv $(VENV)
+	pip3 install -r $(REQUIREMENTS)
+	pip3 install flake8 isort mypy pylint
 
 setup: .venv
 
@@ -36,18 +59,19 @@ format: isort_fix
 
 # Lint
 isort: .venv
-	isort --check $(PROJECT) $(TESTS)
+	isort --check --skip $(VENV) $(PROJECT) $(TESTS)
 
 flake: .venv
-	flake8 $(PROJECT) $(TESTS)
+	flake8 $(PROJECT) $(TESTS) --exclude=$(VENV)
 
 mypy: .venv
-	mypy $(PROJECT) $(TESTS)
+	mypy $(PROJECT) $(TESTS) --exclude $(VENV)
 
 pylint: .venv
-	pylint $(PROJECT) --disable=C0116,C0115,C0114,C0301
+	pylint $(PROJECT) $(TESTS) --ignore-paths=$(VENV) --disable=C0116,C0115,C0114,C0301
 
-lint: isort flake mypy pylint
+
+lint: isort flake pylint
 
 
 # Test
