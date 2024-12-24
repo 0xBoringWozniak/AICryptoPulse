@@ -61,11 +61,10 @@ class RagPipeline:
             FAISS: A LangChain FAISS vector store instance.
         """
         if self.index_path and os.path.isdir(self.index_path):
-            # Use load_local to ensure we get a LangChain FAISS object, not a raw faiss index.
             return FAISS.load_local(
                 self.index_path,
                 self.encoder_model,
-                allow_dangerous_deserialization=True,
+                allow_dangerous_deserialization=True,  # need to think about it
             )
         return self._build_faiss_index()
 
