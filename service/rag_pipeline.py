@@ -1,16 +1,13 @@
-import os
-import tempfile
 import pickle
+import tempfile
+
 import faiss
-
-from sentence_transformers import SentenceTransformer
-
 from langchain.chains.question_answering import load_qa_chain
 from langchain.llms import OpenAI
 from langchain_community.vectorstores import FAISS
+from sentence_transformers import SentenceTransformer
 
 from service.creds import OPENAI_API_KEY
-
 
 RAG_CONFIG = {
     'OPENAI_MODEL': 'gpt-4o',
@@ -61,12 +58,12 @@ class RagPipeline:
             object_key (str): The object key for the index file in S3.
         """
         with tempfile.NamedTemporaryFile(delete=True) as temp_index_file, \
-            tempfile.NamedTemporaryFile(delete=True) as temp_meta_file:
-            
+             tempfile.NamedTemporaryFile(delete=True) as temp_meta_file:
+
             # Download FAISS index
             s3_client.download_file(bucket_name, f"{object_key}_index", temp_index_file.name)
             raw_faiss_index = faiss.read_index(temp_index_file.name)
-            
+
             # Download metadata
             s3_client.download_file(bucket_name, f"{object_key}_meta", temp_meta_file.name)
             with open(temp_meta_file.name, "rb") as meta_file:

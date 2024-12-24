@@ -1,24 +1,28 @@
-import boto3
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import Dict, List
 
-
-from fastapi import APIRouter, FastAPI, Depends
+import boto3
+from fastapi import APIRouter, Depends, FastAPI
 
 from service.api.response import JSONResponse, create_response
+from service.creds import (
+    AWS_S3_API_KEY,
+    AWS_S3_API_SECRET,
+    DB_HOST,
+    DB_PASS,
+    DB_PORT,
+    DB_USER,
+)
+from service.models import UserInit, UserNewPrompt, UserPrompt
 from service.mongo.app_database import AppDatabase
-from service.models import UserPrompt, UserInit, UserNewPrompt
 from service.rag_pipeline import RagPipeline
-
-from service.creds import DB_USER, DB_PASS, DB_HOST, DB_PORT
-from service.creds import AWS_S3_API_KEY, AWS_S3_API_SECRET
-
 
 router = APIRouter()
 
 #
 # Define the dependencies for the FastAPI endpoints
 #
+
 
 def get_s3_client() -> boto3.client:
     return boto3.client(
@@ -27,8 +31,10 @@ def get_s3_client() -> boto3.client:
         aws_secret_access_key=AWS_S3_API_SECRET,
     )
 
+
 def get_rag_pipeline() -> RagPipeline:
     return RagPipeline()
+
 
 def get_db() -> AppDatabase:
     return AppDatabase(
@@ -41,6 +47,7 @@ def get_db() -> AppDatabase:
 #
 # Define the FastAPI endpoints
 #
+
 
 @router.get(
     path="/health",
@@ -141,8 +148,9 @@ async def set_prompt(
     tags=["User"],
 )
 async def predict(
-    user: UserPrompt, s3_client = Depends(get_s3_client),
-    db: AppDatabase = Depends(get_db), rag = Depends(get_rag_pipeline),) -> JSONResponse:
+    user: UserPrompt, db: AppDatabase = Depends(get_db),
+    s3_client=Depends(get_s3_client), rag=Depends(get_rag_pipeline)
+) -> JSONResponse:
     """
     Predict a response for a user.
     """

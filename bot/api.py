@@ -1,6 +1,6 @@
-import requests
+from typing import Dict, List
 
-from typing import List, Dict
+import requests
 
 from bot.creds import FASTAPI_BASE_URL
 
@@ -13,7 +13,7 @@ def get_all_users() -> List[Dict]:
         List[Dict]: List of users with all fields.
     """
     url = f"{FASTAPI_BASE_URL}/get_all_users"
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)
     if response.status_code != 200:
         return []
     data = response.json()

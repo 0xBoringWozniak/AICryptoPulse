@@ -1,26 +1,22 @@
 import logging
 import requests
-
+from requests.exceptions import RequestException
 from telegram import Update
-from telegram.ext import (
-    ContextTypes,
-    ConversationHandler,
-    CallbackContext,
-)
+from telegram.ext import CallbackContext, ContextTypes, ConversationHandler
 
-from bot.creds import FASTAPI_BASE_URL
 from bot.api import get_all_users
-from bot.texts import START_TEXT, REGULAR_UPDATE_PROMPT
-
+from bot.creds import FASTAPI_BASE_URL
+from bot.texts import REGULAR_UPDATE_PROMPT, START_TEXT
 
 logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", 
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)
 
 REGISTERING_PROMPT = 1
 SET_NEW_PROMPT = 2
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
@@ -40,6 +36,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     return REGISTERING_PROMPT
 
+
 async def register_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Saves the system prompt to FastAPI (/create_user) using the Telegram username.
@@ -56,22 +53,23 @@ async def register_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     url = f"{FASTAPI_BASE_URL}/create_user"
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=10)
         data = response.json()
 
         if response.status_code == 200:
             await update.message.reply_text(
-                f"I regitered you preferences in '{system_prompt}' and will update with a news soon. You can change it with /set_prompt."
+                f"I registered your preferences in '{system_prompt}'. You can change it with /set_prompt."
             )
         else:
             # Some error returned by the API
             error_msg = data.get("data", {}).get("message", "Unknown error")
             await update.message.reply_text(f"Could not create user: {error_msg}")
-    except Exception as e:
-        logger.error(f"Error calling /create_user: {e}")
+    except RequestException as e:
+        logger.error("Error calling /create_user: %s", e)
         await update.message.reply_text(f"Error calling /create_user: {str(e)}")
 
     return ConversationHandler.END
+
 
 async def set_prompt_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
@@ -90,6 +88,7 @@ async def set_prompt_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     return SET_NEW_PROMPT
 
+
 async def update_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """
     Save the new prompt for an existing user using the /set_prompt API.
@@ -97,7 +96,7 @@ async def update_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     new_prompt = update.message.text.strip()
     username = context.user_data.get("username")
 
-    logger.info(f"Updating prompt for user '{username}' to '{new_prompt}'")
+    logger.info("Updating prompt for user '%s' to '%s'", username, new_prompt)
     payload = {
         "username": username,
         "new_prompt": new_prompt,
@@ -105,7 +104,7 @@ async def update_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     url = f"{FASTAPI_BASE_URL}/set_prompt"
     try:
-        response = requests.post(url, json=payload)
+        response = requests.post(url, json=payload, timeout=10)
         data = response.json()
         if response.status_code == 200:
             await update.message.reply_text(
@@ -114,15 +113,16 @@ async def update_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         else:
             error_msg = data.get("data", {}).get("message", "Unknown error")
             await update.message.reply_text(f"Could not update prompt: {error_msg}")
-    except Exception as e:
-        logger.error(f"Error calling /set_prompt: {e}")
+    except RequestException as e:
+        logger.error("Error calling /set_prompt: %s", e)
         await update.message.reply_text(f"Error calling /set_prompt: {str(e)}")
 
     return ConversationHandler.END
 
+
 async def predict_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
-    Whenever a user (who is registered) sends a non-command message, 
+    Whenever a user (who is registered) sends a non-command message,
     call /predict on the FastAPI side and return the response.
     """
     text = update.message.text
@@ -134,7 +134,7 @@ async def predict_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     }
     url = f"{FASTAPI_BASE_URL}/predict"
     try:
-        resp = requests.post(url, json=payload)
+        resp = requests.post(url, json=payload, timeout=10)
         data = resp.json()
         if resp.status_code == 200:
             predicted_text = data.get("data", {}).get("response", "")
@@ -142,17 +142,18 @@ async def predict_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         else:
             error_msg = data.get("data", {}).get("message", "Unknown error")
             await update.message.reply_text(f"Predict error: {error_msg}")
-    except Exception as e:
-        logger.error(f"Error calling /predict: {e}")
+    except RequestException as e:
+        logger.error("Error calling /predict: %s", e)
         await update.message.reply_text(f"Error calling /predict: {str(e)}")
 
-async def daily_predict_job(context: CallbackContext):
+
+async def daily_predict_job(_context: CallbackContext):
     """
-    This job is run once a day. It calls /predict for each registered user 
+    This job is run once a day. It calls /predict for each registered user
     and sends the result back to them.
     """
     all_users = get_all_users()
-    logger.info(f"Daily job: {len(all_users)} users found.")
+    logger.info("Daily job: %d users found.", len(all_users))
     for user_info in all_users:
         chat_id = user_info["chat_id"]
         stored_prompt = user_info["system_prompt"]
@@ -164,18 +165,19 @@ async def daily_predict_job(context: CallbackContext):
         }
         url = f"{FASTAPI_BASE_URL}/predict"
         try:
-            resp = requests.post(url, json=payload)
+            resp = requests.post(url, json=payload, timeout=10)
             data = resp.json()
             response_text = data.get("data", {}).get("response", "No response")
-        except Exception as e:
-            logger.error(f"Error calling /predict for daily job: {e}")
+        except RequestException as e:
+            logger.error("Error calling /predict for daily job: %s", e)
             response_text = f"Error calling /predict: {str(e)}"
 
         # Send a message back to each user
-        await context.bot.send_message(
+        await _context.bot.send_message(
             chat_id=chat_id,
-            text=f"{response_text}"
+            text=response_text
         )
+
 
 def schedule_daily_job(application):
     """

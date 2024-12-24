@@ -1,6 +1,6 @@
 import time
-
 from typing import Dict, List
+
 from pymongo import ASCENDING, IndexModel
 
 from service.mongo.database import ApplicationDatabaseException, DatabaseBase
@@ -140,4 +140,4 @@ class AppDatabase(DatabaseBase):
             users = self.collection_users.find({})
         except Exception as e:
             raise ApplicationDatabaseException(str(e)) from e
-        return [user for user in users]
+        return list(users)
