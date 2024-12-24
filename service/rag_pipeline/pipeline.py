@@ -153,7 +153,7 @@ class RagPipeline:
         prompt = self.gigachat_prompt_template.invoke(
             {"question": user_prompt, "context": context}
         )
-        return llm.invoke(prompt)
+        return llm.invoke(prompt).dict()["content"]
 
     def run(self, user_prompt: str) -> str:
         """
