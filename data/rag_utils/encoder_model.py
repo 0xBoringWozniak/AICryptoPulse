@@ -2,6 +2,9 @@ from sentence_transformers import SentenceTransformer
 
 
 class EmbeddingModelWrapper:
+    """
+    Wrapper class for SentenceTransformer model
+    """
     def __init__(self, model_name):
         self.model = SentenceTransformer(model_name)
 

@@ -1,19 +1,34 @@
+import boto3
+from datetime import datetime, timedelta
 from typing import List, Dict
+
 
 from fastapi import APIRouter, FastAPI, Depends
 
 from service.api.response import JSONResponse, create_response
 from service.mongo.app_database import AppDatabase
 from service.models import UserPrompt, UserInit, UserNewPrompt
+from service.rag_pipeline import RagPipeline
+
 from service.creds import DB_USER, DB_PASS, DB_HOST, DB_PORT
-from service.rag_pipeline.pipeline import RagPipeline
+from service.creds import AWS_S3_API_KEY, AWS_S3_API_SECRET
 
 
 router = APIRouter()
 
+#
+# Define the dependencies for the FastAPI endpoints
+#
 
-rag_pipeline = RagPipeline()
+def get_s3_client() -> boto3.client:
+    return boto3.client(
+        "s3",
+        aws_access_key_id=AWS_S3_API_KEY,
+        aws_secret_access_key=AWS_S3_API_SECRET,
+    )
 
+def get_rag_pipeline() -> RagPipeline:
+    return RagPipeline()
 
 def get_db() -> AppDatabase:
     return AppDatabase(
@@ -23,6 +38,9 @@ def get_db() -> AppDatabase:
         db_user_password=DB_PASS,
     )
 
+#
+# Define the FastAPI endpoints
+#
 
 @router.get(
     path="/health",
@@ -122,13 +140,32 @@ async def set_prompt(
     path="/predict",
     tags=["User"],
 )
-async def predict(user: UserPrompt, db: AppDatabase = Depends(get_db)) -> JSONResponse:
+async def predict(
+    user: UserPrompt, s3_client = Depends(get_s3_client),
+    db: AppDatabase = Depends(get_db), rag = Depends(get_rag_pipeline),) -> JSONResponse:
     """
     Predict a response for a user.
     """
     try:
-        user = db.get_user_info(user.username)
-        response = rag_pipeline.run(user.prompt)
+        user_info = db.get_user_info(user.username)
+        prompt = user_info["system_prompt"] + '\n' + user.prompt
+
+        # use short index for daily report
+        if user.daily_report:
+            start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')
+            object_key = f"llama_feed_index_{start_time}_{end_time}"
+        else:
+            start_time = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+            end_time = datetime.now().strftime('%Y-%m-%d')
+            object_key = f"llama_feed_index_{start_time}_{end_time}"
+
+        rag.initialize_faiss_index(
+            s3_client=s3_client,
+            bucket_name='ai-embeddings-bucket',
+            object_key=object_key
+        )
+        response = rag.run(prompt)
         return create_response(
             status_code=200,
             data={"response": response},

@@ -5,5 +5,5 @@ Please let me know in what you are interested in.
 """
 
 REGULAR_UPDATE_PROMPT = """
-Provide me the summary of the news according to the my preferences that I set.
+Provide me the summary of the news according to the my preferences.
 """
