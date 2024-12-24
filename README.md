@@ -36,6 +36,28 @@
 
 ---
 
+## 🌐 Data Pipeline
+- Data is collecting from the open APIs (feeds, Twitter APIs, Telegram API)
+- ETLs are running on Airflow and store all data in PostgreSQL
+- FAISS index (both short-term and long-term) are updated each day on Airflow
+
+Done:
+ - [x] Coindesk
+ - [x] DLNews
+ - [x] Twitter big crypto accounts
+ - [x] [DeFillamaFeed](https://feed.defillama.com/)
+
+In progress:
+- [ ] [Tree Feed](https://news.treeofalpha.com/)
+- [ ] Custom Twitter accounts
+
+To Do:
+- [ ] Bloomberg
+- [ ] Cointelegraph
+- [ ] Classic Financial news portals
+  
+---
+
 ## 📐 System Design
 
 ![System Design Diagram](https://github.com/user-attachments/assets/3da390f1-7a18-4dd8-ae98-02ba1c9aee71)
