@@ -53,7 +53,7 @@ async def register_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     url = f"{FASTAPI_BASE_URL}/create_user"
     try:
-        response = requests.post(url, json=payload, timeout=10)
+        response = requests.post(url, json=payload, timeout=60)
         data = response.json()
 
         if response.status_code == 200:
@@ -104,7 +104,7 @@ async def update_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     url = f"{FASTAPI_BASE_URL}/set_prompt"
     try:
-        response = requests.post(url, json=payload, timeout=10)
+        response = requests.post(url, json=payload, timeout=60)
         data = response.json()
         if response.status_code == 200:
             await update.message.reply_text(
@@ -134,7 +134,7 @@ async def predict_message(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     }
     url = f"{FASTAPI_BASE_URL}/predict"
     try:
-        resp = requests.post(url, json=payload, timeout=10)
+        resp = requests.post(url, json=payload, timeout=60)
         data = resp.json()
         if resp.status_code == 200:
             predicted_text = data.get("data", {}).get("response", "")
@@ -165,7 +165,7 @@ async def daily_predict_job(_context: CallbackContext):
         }
         url = f"{FASTAPI_BASE_URL}/predict"
         try:
-            resp = requests.post(url, json=payload, timeout=10)
+            resp = requests.post(url, json=payload, timeout=60)
             data = resp.json()
             response_text = data.get("data", {}).get("response", "No response")
         except RequestException as e:

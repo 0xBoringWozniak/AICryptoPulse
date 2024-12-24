@@ -13,7 +13,7 @@ def get_all_users() -> List[Dict]:
         List[Dict]: List of users with all fields.
     """
     url = f"{FASTAPI_BASE_URL}/get_all_users"
-    response = requests.get(url, timeout=10)
+    response = requests.get(url, timeout=60)
     if response.status_code != 200:
         return []
     data = response.json()
