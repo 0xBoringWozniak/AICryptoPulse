@@ -12,7 +12,7 @@ from service.rag_pipeline.pipeline import RagPipeline
 router = APIRouter()
 
 
-rag_pipeline = RagPipeline(index_path="")
+rag_pipeline = RagPipeline()
 
 
 def get_db() -> AppDatabase:

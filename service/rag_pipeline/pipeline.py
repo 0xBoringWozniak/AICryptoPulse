@@ -34,7 +34,6 @@ class RagPipeline:
         self,
         index_path: str = "./faiss_index_custom_embeddings",
         model_path_or_id: str = "all-MiniLM-L6-v2",
-        **model_kwargs
     ):
         """
         Initializes the RAG pipeline by loading/creating a FAISS index and setting up the encoder model.
