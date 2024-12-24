@@ -6,9 +6,13 @@ from service.api.response import JSONResponse, create_response
 from service.mongo.app_database import AppDatabase
 from service.models import UserPrompt, UserInit, UserNewPrompt
 from service.creds import DB_USER, DB_PASS, DB_HOST, DB_PORT
+from service.rag_pipeline.pipeline import RagPipeline
 
 
 router = APIRouter()
+
+
+rag_pipeline = RagPipeline(index_path="")
 
 
 def get_db() -> AppDatabase:
@@ -38,12 +42,18 @@ async def health() -> JSONResponse:
     path="/create_user",
     tags=["User"],
 )
-async def create_user(user: UserInit, db: AppDatabase = Depends(get_db)) -> JSONResponse:
+async def create_user(
+    user: UserInit, db: AppDatabase = Depends(get_db)
+) -> JSONResponse:
     """
     Create a new user.
     """
     try:
-        db.add_user(username=user.username, chat_id=user.chat_id, system_prompt=user.system_prompt)
+        db.add_user(
+            username=user.username,
+            chat_id=user.chat_id,
+            system_prompt=user.system_prompt,
+        )
         return create_response(
             status_code=200,
             data={"message": "User created successfully."},
@@ -89,7 +99,9 @@ async def get_user(username: str, db: AppDatabase = Depends(get_db)) -> JSONResp
     path="/set_prompt",
     tags=["User"],
 )
-async def set_prompt(user: UserNewPrompt, db: AppDatabase = Depends(get_db)) -> JSONResponse:
+async def set_prompt(
+    user: UserNewPrompt, db: AppDatabase = Depends(get_db)
+) -> JSONResponse:
     """
     Set a new prompt for a user.
     """
@@ -116,7 +128,7 @@ async def predict(user: UserPrompt, db: AppDatabase = Depends(get_db)) -> JSONRe
     """
     try:
         user = db.get_user_info(user.username)
-        response = "Today is a good day!"
+        response = rag_pipeline.run(user.prompt)
         return create_response(
             status_code=200,
             data={"response": response},
