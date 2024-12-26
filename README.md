@@ -65,7 +65,7 @@ To Do:
 
 ### `HemaChandrao/crypto_QA`
 
-** MTEB models **
+**MTEB models**
 
 | model_id                                          |      mAP |      MRR |
 |:--------------------------------------------------|---------:|---------:|
@@ -75,7 +75,7 @@ To Do:
 | WherelsAl/UAE-Large-V1                            | 0.7547   | 0.752776 |
 | jxm/cde-small-v1                                  | 0.240464 | 0.224688 |
 
-** Base models **
+**Base models**
 | model_id                              |      mAP |      MRR |
 |:--------------------------------------|---------:|---------:|
 | all-mpnet-base-v2                     | 0.798267 | 0.796895 |
@@ -94,7 +94,7 @@ To Do:
 
 ### `Filtered Cryptoqa-2024`
 
-** MTEB models **
+**MTEB models**
 
 | model_id                                          |      mAP |      MRR |
 |:--------------------------------------------------|---------:|---------:|
@@ -104,7 +104,7 @@ To Do:
 | WherelsAl/UAE-Large-V1                            | 0.554994 | 0.547885 |
 | jxm/cde-small-v1                                  | 0.155341 | 0.136702 |
 
-** Base models **
+**Base models**
 
 | model_id                              |      mAP |      MRR |
 |:--------------------------------------|---------:|---------:|
@@ -124,8 +124,8 @@ To Do:
 
 ## RAG
 
-Retriever - all-MiniLM-L6-v2.
-Decoder - gpt-3.5-turbo.
+Retriever - all-MiniLM-L6-v2.  
+Decoder - gpt-3.5-turbo.  
 
 Also our solution contains caching of model responses, for more reasonable spending of financial resources, chat history for the user.
 
