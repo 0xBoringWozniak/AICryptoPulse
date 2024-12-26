@@ -10,7 +10,7 @@ from airflow.decorators import dag, task
 tasks_queue = 'logarithm'
 
 @dag(
-    schedule_interval='30 23 * * *',
+    schedule_interval='0 * * * *',
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     catchup=False,
     tags=["llamafeed", "AK"],
