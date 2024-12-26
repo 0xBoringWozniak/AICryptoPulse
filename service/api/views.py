@@ -44,6 +44,7 @@ def get_db() -> AppDatabase:
         db_user_password=DB_PASS,
     )
 
+
 #
 # Define the FastAPI endpoints
 #
@@ -148,30 +149,35 @@ async def set_prompt(
     tags=["User"],
 )
 async def predict(
-    user: UserPrompt, db: AppDatabase = Depends(get_db),
-    s3_client=Depends(get_s3_client), rag=Depends(get_rag_pipeline)
+    user: UserPrompt,
+    db: AppDatabase = Depends(get_db),
+    s3_client=Depends(get_s3_client),
+    rag=Depends(get_rag_pipeline),
 ) -> JSONResponse:
     """
     Predict a response for a user.
     """
     try:
         user_info = db.get_user_info(user.username)
-        prompt = user_info["system_prompt"] + '\n' + user.prompt
+        prompt = {
+            "system_prompt": user_info["system_prompt"],
+            "user_prompt": user.prompt,
+        }
 
         # use short index for daily report
         if user.daily_report:
-            start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-            end_time = datetime.now().strftime('%Y-%m-%d')
+            start_time = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+            end_time = datetime.now().strftime("%Y-%m-%d")
             object_key = f"llama_feed_index_{start_time}_{end_time}"
         else:
-            start_time = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-            end_time = datetime.now().strftime('%Y-%m-%d')
+            start_time = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+            end_time = datetime.now().strftime("%Y-%m-%d")
             object_key = f"llama_feed_index_{start_time}_{end_time}"
 
         rag.initialize_faiss_index(
             s3_client=s3_client,
-            bucket_name='ai-embeddings-bucket',
-            object_key=object_key
+            bucket_name="ai-embeddings-bucket",
+            object_key=object_key,
         )
         response = rag.run(prompt)
         return create_response(
